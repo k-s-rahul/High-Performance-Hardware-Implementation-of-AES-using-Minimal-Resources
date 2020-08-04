@@ -1,0 +1,504 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang16393{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\fnil\fcharset0 Calibri;}}
+{\*\generator Riched20 6.3.9600}\viewkind4\uc1 
+\pard\widctlpar\b\f0\fs32 Source Code:\par
+\fs40\par
+\fs20 module aes(clk,datain,key,dataout);\par
+\par
+    input clk;\par
+\tab  input [127:0] datain;\par
+\tab  input [127:0] key;\par
+\tab  output [127:0] dataout;\par
+  reg [127:0]r0_out;\par
+  \par
+wire  [127:0] r1_out,r2_out,r3_out,r4_out,r5_out,r6_out,r7_out,r8_out,r9_out;\par
+  \par
+wire  [127:0] keyout1,keyout2,keyout3,keyout4,keyout5,keyout6,keyout7,keyout8,keyout9,keyout10;\par
+ \par
+always@(posedge clk) r0_out=(datain^key);\par
+ \par
+rounds r1(.clk(clk),.rc(4'b0000),.datain(r0_out),.keyin(key),.keyout(keyout1),.rndout(r1_out));\par
+ \par
+rounds r2(.clk(clk),.rc(4'b0001),.datain(r1_out),.keyin(key),.keyout(keyout2),.rndout(r2_out));\par
+ \par
+rounds r3(.clk(clk),.rc(4'b0010),.datain(r2_out),.keyin(key),.keyout(keyout3),.rndout(r3_out));\par
+ \par
+rounds r4(.clk(clk),.rc(4'b0011),.datain(r3_out),.keyin(key),.keyout(keyout4),.rndout(r4_out));\par
+ \par
+rounds r5(.clk(clk),.rc(4'b0100),.datain(r4_out),.keyin(key),.keyout(keyout5),.rndout(r5_out)); \par
+ \par
+rounds r6(.clk(clk),.rc(4'b0101),.datain(r5_out),.keyin(key),.keyout(keyout6),.rndout(r6_out));\par
+\par
+ rounds r7(.clk(clk),.rc(4'b0110),.datain(r6_out),.keyin(key),.keyout(keyout7),.rndout(r7_out));\par
+\par
+ rounds r8(.clk(clk),.rc(4'b0111),.datain(r7_out),.keyin(key),.keyout(keyout8),.rndout(r8_out));\par
+\par
+ rounds r9(.clk(clk),.rc(4'b1000),.datain(r8_out),.keyin(key),.keyout(keyout9),.rndout(r9_out));\par
+ \par
+roundlast r10(.clk(clk),.rc(4'b1001),.datain(r9_out),.keyin(keyout9),.keyout(keyout10),.rlastout(dataout));\par
+ \par
+ endmodule\par
+
+\pard\sa200\sl276\slmult1\f1\lang9\par
+\par
+
+\pard\widctlpar\ul\f0\fs28\lang16393 Round program:\par
+\ulnone\par
+\fs20   module rounds(clk,rc,datain,keyin,keyout,rndout);\par
+ \par
+    input [3:0] rc;\par
+    input clk; \par
+    input [127:0] datain;\par
+    input [127:0] keyin;\par
+    output [127:0] keyout;\par
+    output[127:0] rndout;\par
+\par
+    wire [127:0] datain,keyin;\par
+    reg [127:0] rndout;\par
+        \par
+    wire [7:0] b00_sb,b01_sb,b02_sb,b03_sb;\par
+    wire [7:0] b10_sb,b11_sb,b12_sb,b13_sb;\par
+    wire [7:0] b20_sb,b21_sb,b22_sb,b23_sb;\par
+    wire [7:0] b30_sb,b31_sb,b32_sb,b33_sb; \par
+     \par
+    reg [7:0] b00_sr,b01_sr,b02_sr,b03_sr;\par
+    reg [7:0] b10_sr,b11_sr,b12_sr,b13_sr;\par
+    reg [7:0] b20_sr,b21_sr,b22_sr,b23_sr;\par
+    reg [7:0] b30_sr,b31_sr,b32_sr,b33_sr; \par
+    \par
+    reg [7:0] b00_mcl,b01_mcl,b02_mcl,b03_mcl;\par
+    reg [7:0] b10_mcl,b11_mcl,b12_mcl,b13_mcl;\par
+    reg [7:0] b20_mcl,b21_mcl,b22_mcl,b23_mcl;\par
+    reg [7:0] b30_mcl,b31_mcl,b32_mcl,b33_mcl; \par
+     key_exp k1(.rc(rc),.key(keyin),.keyout(keyout));\par
+ always@(posedge clk)\par
+      begin\par
+\tab\tab\par
+          b00_sr = b00_sb;  \par
+          b01_sr = b01_sb;\par
+          b02_sr = b02_sb;\par
+          b03_sr = b03_sb;\par
+   \par
+          b10_sr = b11_sb;\par
+          b11_sr = b12_sb;\par
+          b12_sr = b13_sb;\par
+          b13_sr = b10_sb;\par
+   \par
+          b20_sr = b22_sb;\par
+          b21_sr = b23_sb;\par
+          b22_sr = b20_sb;\par
+          b23_sr = b21_sb;\par
+   \par
+          b30_sr = b33_sb;\par
+          b31_sr = b30_sb;\par
+          b32_sr = b31_sb;\par
+          b33_sr = b32_sb; \par
+             \par
+          b00_mcl =  xtime(b00_sr)^xtime(b10_sr)^(b10_sr)^(b20_sr)^(b30_sr);\par
+          b10_mcl = (b00_sr)^xtime(b10_sr)^xtime(b20_sr)^(b20_sr)^(b30_sr);\par
+          b20_mcl = (b00_sr)^(b10_sr)^xtime(b20_sr)^xtime(b30_sr)^(b30_sr);\par
+          b30_mcl =  xtime(b00_sr)^(b00_sr)^(b10_sr)^(b20_sr)^xtime(b30_sr);\par
+          \par
+          b01_mcl =  xtime(b01_sr)^xtime(b11_sr)^(b11_sr)^(b21_sr)^(b31_sr);\par
+          b11_mcl = (b01_sr)^xtime(b11_sr)^xtime(b21_sr)^(b21_sr)^(b31_sr);\par
+          b21_mcl = (b01_sr)^(b11_sr)^xtime(b21_sr)^xtime(b31_sr)^(b31_sr);\par
+          b31_mcl =  xtime(b01_sr)^(b01_sr)^(b11_sr)^(b21_sr)^xtime(b31_sr);\par
+     \par
+     \par
+          b02_mcl =  xtime(b02_sr)^xtime(b12_sr)^(b12_sr)^(b22_sr)^(b32_sr);\par
+          b12_mcl = (b02_sr)^xtime(b12_sr)^xtime(b22_sr)^(b22_sr)^(b32_sr);\par
+          b22_mcl = (b02_sr)^(b12_sr)^xtime(b22_sr)^xtime(b32_sr)^(b32_sr);\par
+          b32_mcl =  xtime(b02_sr)^(b02_sr)^(b12_sr)^(b22_sr)^xtime(b32_sr);\par
+     \par
+     \par
+          b03_mcl =  xtime(b03_sr)^xtime(b13_sr)^(b13_sr)^(b23_sr)^(b33_sr);\par
+          b13_mcl = (b03_sr)^xtime(b13_sr)^xtime(b23_sr)^(b23_sr)^(b33_sr);\par
+          b23_mcl = (b03_sr)^(b13_sr)^xtime(b23_sr)^xtime(b33_sr)^(b33_sr);\par
+          b33_mcl =  xtime(b03_sr)^(b03_sr)^(b13_sr)^(b23_sr)^xtime(b33_sr);\par
+   \par
+         rndout[127:120] = b00_mcl ^ keyout[127:120];\par
+          rndout[119:112] = b10_mcl ^ keyout[119:112];\par
+          rndout[111:104] = b20_mcl ^ keyout[111:104];\par
+          rndout[103:96] = b30_mcl ^ keyout[103:96];\par
+   \par
+          rndout[95:88] = b01_mcl ^ keyout[95:88];\par
+          rndout[87:80] = b11_mcl ^ keyout[87:80];\par
+          rndout[79:72] = b21_mcl ^ keyout[79:72];\par
+          rndout[71:64] = b31_mcl ^ keyout[71:64];\par
+   \par
+          rndout[63:56] = b02_mcl ^ keyout[63:56];\par
+          rndout[55:48] = b12_mcl ^ keyout[55:48];\par
+          rndout[47:40] = b22_mcl ^ keyout[47:40];\par
+          rndout[39:32] = b32_mcl ^ keyout[39:32];\par
+\par
+\tab\tab\tab  \par
+          rndout[31:24] = b03_mcl ^ keyout[31:24];\par
+          rndout[23:16] = b13_mcl ^ keyout[23:16];\par
+          rndout[15:08] = b23_mcl ^ keyout[15:08];\par
+          rndout[7:0] = b33_mcl ^ keyout[7:0]; \par
+    \par
+ end\par
+          \par
+     aes_sbox q0( .a(datain[127:120]),.c(b00_sb) );\par
+     aes_sbox q1( .a(datain[119:112]),.c(b10_sb) );\par
+     aes_sbox q2( .a(datain[111:104]),.c(b20_sb) );\par
+     aes_sbox q3( .a(datain[103:96]),.c(b30_sb) );\par
+     \par
+     aes_sbox q4( .a(datain[95:88]),.c(b01_sb) );\par
+     aes_sbox q5( .a(datain[87:80]),.c(b11_sb) );\par
+     aes_sbox q6( .a(datain[79:72]),.c(b21_sb) );\par
+     aes_sbox q7( .a(datain[71:64]),.c(b31_sb) );\par
+     \par
+     aes_sbox q8( .a(datain[63:56]),.c(b02_sb) );\par
+     aes_sbox q9( .a(datain[55:48]),.c(b12_sb) );\par
+     aes_sbox q10(.a(datain[47:40]),.c(b22_sb) );\par
+     aes_sbox q11(.a(datain[39:32]),.c(b32_sb) );\par
+     \par
+     aes_sbox q12(.a(datain[31:24]),.c(b03_sb) );\par
+     aes_sbox q13(.a(datain[23:16]),.c(b13_sb) );\par
+     aes_sbox q14(.a(datain[15:08]),.c(b23_sb) );\par
+     aes_sbox q16(.a(datain[7:0]),.c(b33_sb) );\par
+         \par
+     function [7:0] xtime;\par
+      \par
+        input [7:0] b;         \par
+         begin \par
+             if ( b[7] == 0 )           \par
+             xtime = \{b[6:0],(1'b0)\};             \par
+             else             \par
+             xtime = (\{b[6:0],(1'b0)\} ^ (8'b00011011)); \par
+     end    \par
+     endfunction \par
+     endmodule\par
+\ul\fs28\par
+\par
+\i Keyexpansion program :\par
+\i0\par
+\ulnone\fs20 module key_exp (rc,key,keyout);\par
+   input [3:0] rc;\par
+   input [127:0]key;\par
+   output [127:0] keyout;\par
+   wire [31:0] w0,w1,w2,w3,tem;\par
+       assign w0 = key[127:96];\par
+       assign w1 = key[95:64];\par
+       assign w2 = key[63:32];\par
+       assign w3 = key[31:0];\par
+      \par
+\tab\tab  assign keyout[127:96]= w0 ^ tem ^ rcon(rc);\par
+       assign keyout[95:64] = w0 ^ tem ^ rcon(rc)^ w1;\par
+       assign keyout[63:32] = w0 ^ tem ^ rcon(rc)^ w1 ^ w2;\par
+       assign keyout[31:0]  = w0 ^ tem ^ rcon(rc)^ w1 ^ w2 ^ w3;\par
+       \par
+\tab\tab  aes_sbox a1(.a(w3[23:16]),.c(tem[31:24]));\par
+       aes_sbox a2(.a(w3[15:8]),.c(tem[23:16]));\par
+       aes_sbox a3(.a(w3[7:0]),.c(tem[15:8]));\par
+       aes_sbox a4(.a(w3[31:24]),.c(tem[7:0]));\par
+      \par
+\tab\tab function [31:0] rcon;\par
+      input\tab [3:0]\tab rc;\par
+      case(rc)\tab\par
+         4'h0: rcon=32'h01_00_00_00;\par
+         4'h1: rcon=32'h02_00_00_00;\par
+         4'h2: rcon=32'h04_00_00_00;\par
+         4'h3: rcon=32'h08_00_00_00;\par
+         4'h4: rcon=32'h10_00_00_00;\par
+         4'h5: rcon=32'h20_00_00_00;\par
+         4'h6: rcon=32'h40_00_00_00;\par
+         4'h7: rcon=32'h80_00_00_00;\par
+         4'h8: rcon=32'h1b_00_00_00;\par
+         4'h9: rcon=32'h36_00_00_00;\par
+       default: rcon=32'h00_00_00_00;\par
+ endcase\par
+ endfunction\par
+endmodule\par
+\par
+\par
+\par
+\ul\fs28 AES_SBOX:\par
+\ulnone\fs20\par
+module aes_sbox(a,c);    \par
+\par
+input  [7:0] a;\par
+\par
+output [7:0] c;    \par
+\par
+reg [7:0] c;\par
+    \par
+always @(a)\par
+    \par
+case (a)\par
+     \par
+                   8'h00: c=8'h63;\par
+\tab    8'h01: c=8'h7c;\par
+\tab    8'h02: c=8'h77;\par
+\tab    8'h03: c=8'h7b;\par
+\tab    8'h04: c=8'hf2;\par
+\tab    8'h05: c=8'h6b;\par
+\tab    8'h06: c=8'h6f;\par
+\tab    8'h07: c=8'hc5;\par
+\tab    8'h08: c=8'h30;\par
+\tab    8'h09: c=8'h01;\par
+\tab    8'h0a: c=8'h67;\par
+\tab    8'h0b: c=8'h2b;\par
+\tab    8'h0c: c=8'hfe;\par
+\tab    8'h0d: c=8'hd7;\par
+\tab    8'h0e: c=8'hab;\par
+\tab    8'h0f: c=8'h76;\par
+\tab    8'h10: c=8'hca;\par
+\tab    8'h11: c=8'h82;\par
+\tab    8'h12: c=8'hc9;\par
+\tab    8'h13: c=8'h7d;\par
+\tab    8'h14: c=8'hfa;\par
+\tab    8'h15: c=8'h59;\par
+\tab    8'h16: c=8'h47;\par
+\tab    8'h17: c=8'hf0;\par
+\tab    8'h18: c=8'had;\par
+\tab    8'h19: c=8'hd4;\par
+\tab    8'h1a: c=8'ha2;\par
+\tab    8'h1b: c=8'haf;\par
+\tab    8'h1c: c=8'h9c;\par
+\tab    8'h1d: c=8'ha4;\par
+\tab    8'h1e: c=8'h72;\par
+\tab    8'h1f: c=8'hc0;\par
+\tab    8'h20: c=8'hb7;\par
+\tab    8'h21: c=8'hfd;\par
+\tab    8'h22: c=8'h93;\par
+\tab    8'h23: c=8'h26;\par
+\tab    8'h24: c=8'h36;\par
+\tab    \par
+\par
+                  8'h25: c=8'h3f;\par
+\tab    8'h26: c=8'hf7;\par
+\tab    8'h27: c=8'hcc;\par
+\tab    8'h28: c=8'h34;\par
+\tab    8'h29: c=8'ha5;\par
+\tab    8'h2a: c=8'he5;\par
+\tab    8'h2b: c=8'hf1;\par
+\tab    8'h2c: c=8'h71;\par
+\tab    8'h2d: c=8'hd8;\par
+\tab    8'h2e: c=8'h31;\par
+\tab    8'h2f: c=8'h15;\par
+\tab    8'h30: c=8'h04;\par
+\tab    8'h31: c=8'hc7;\par
+\tab    8'h32: c=8'h23;\par
+\tab    8'h33: c=8'hc3;\par
+\tab    8'h34: c=8'h18;\par
+\tab    8'h35: c=8'h96;\par
+\tab    8'h36: c=8'h05;\par
+\tab    8'h37: c=8'h9a;\par
+\tab    8'h38: c=8'h07;\par
+\tab    8'h39: c=8'h12;\par
+\tab    8'h3a: c=8'h80;\par
+\tab    8'h3b: c=8'he2;\par
+\tab    8'h3c: c=8'heb;\par
+\tab    8'h3d: c=8'h27;\par
+\tab    8'h3e: c=8'hb2;\par
+\tab    8'h3f: c=8'h75;\par
+\tab    8'h40: c=8'h09;\par
+\tab    8'h41: c=8'h83;\par
+\tab    8'h42: c=8'h2c;\par
+\tab    8'h43: c=8'h1a;\par
+\tab    8'h44: c=8'h1b;\par
+\tab    8'h45: c=8'h6e;\par
+\tab    8'h46: c=8'h5a;\par
+\tab    8'h47: c=8'ha0;\par
+\tab    8'h48: c=8'h52;\par
+\tab    8'h49: c=8'h3b;\par
+\tab    8'h4a: c=8'hd6;\par
+\tab    8'h4b: c=8'hb3;\par
+\tab    8'h4c: c=8'h29;\par
+\tab    8'h4d: c=8'he3;\par
+\tab    8'h4e: c=8'h2f;\par
+\tab    8'h4f: c=8'h84;\par
+\tab    8'h50: c=8'h53;\par
+\tab    8'h51: c=8'hd1;\par
+\tab    8'h52: c=8'h00;\par
+\tab    8'h53: c=8'hed;\par
+\tab    8'h54: c=8'h20;\par
+\tab    8'h55: c=8'hfc;\par
+\tab    8'h56: c=8'hb1;\par
+\tab    8'h57: c=8'h5b;\par
+\tab    \par
+\par
+                   8'h58: c=8'h6a;\par
+\tab    8'h59: c=8'hcb;\par
+\tab    8'h5a: c=8'hbe;\par
+\tab    8'h5b: c=8'h39;\par
+\tab    8'h5c: c=8'h4a;\par
+\tab    8'h5d: c=8'h4c;\par
+\tab    8'h5e: c=8'h58;\par
+\tab    8'h5f: c=8'hcf;\par
+\tab    8'h60: c=8'hd0;\par
+\tab    8'h61: c=8'hef;\par
+\tab    8'h62: c=8'haa;\par
+\tab    8'h63: c=8'hfb;\par
+\tab    8'h64: c=8'h43;\par
+\tab    8'h65: c=8'h4d;\par
+\tab    8'h66: c=8'h33;\par
+\tab    8'h67: c=8'h85;\par
+\tab    8'h68: c=8'h45;\par
+\tab    8'h69: c=8'hf9;\par
+\tab    8'h6a: c=8'h02;\par
+\tab    8'h6b: c=8'h7f;\par
+\tab    8'h6c: c=8'h50;\par
+\tab    8'h6d: c=8'h3c;\par
+\tab    8'h6e: c=8'h9f;\par
+\tab    8'h6f: c=8'ha8;\par
+\tab    8'h70: c=8'h51;\par
+\tab    8'h71: c=8'ha3;\par
+\tab    8'h72: c=8'h40;\par
+\tab    8'h73: c=8'h8f;\par
+\tab    8'h74: c=8'h92;\par
+\tab    8'h75: c=8'h9d;\par
+\tab    8'h76: c=8'h38;\par
+\tab    8'h77: c=8'hf5;\par
+\tab    8'h78: c=8'hbc;\par
+\tab    8'h79: c=8'hb6;\par
+\tab    8'h7a: c=8'hda;\par
+\tab    8'h7b: c=8'h21;\par
+\tab    8'h7c: c=8'h10;\par
+\tab    8'h7d: c=8'hff;\par
+\tab    8'h7e: c=8'hf3;\par
+\tab    8'h7f: c=8'hd2;\par
+\tab    8'h80: c=8'hcd;\par
+\tab    8'h81: c=8'h0c;\par
+\tab    8'h82: c=8'h13;\par
+\tab    8'h83: c=8'hec;\par
+\tab    8'h84: c=8'h5f;\par
+\tab    8'h85: c=8'h97;\par
+\tab    8'h86: c=8'h44;\par
+\tab    8'h87: c=8'h17;\par
+\tab    8'h88: c=8'hc4;\par
+\tab    8'h89: c=8'ha7;\par
+\tab    8'h8a: c=8'h7e;\par
+\tab    \par
+\par
+                   8'h8b: c=8'h3d;\par
+\tab    8'h8c: c=8'h64;\par
+\tab    8'h8d: c=8'h5d;\par
+\tab    8'h8e: c=8'h19;\par
+\tab    8'h8f: c=8'h73;\par
+\tab    8'h90: c=8'h60;\par
+\tab    8'h91: c=8'h81;\par
+\tab    8'h92: c=8'h4f;\par
+\tab    8'h93: c=8'hdc;\par
+\tab    8'h94: c=8'h22;\par
+\tab    8'h95: c=8'h2a;\par
+\tab    8'h96: c=8'h90;\par
+\tab    8'h97: c=8'h88;\par
+\tab    8'h98: c=8'h46;\par
+\tab    8'h99: c=8'hee;\par
+\tab    8'h9a: c=8'hb8;\par
+\tab    8'h9b: c=8'h14;\par
+\tab    8'h9c: c=8'hde;\par
+\tab    8'h9d: c=8'h5e;\par
+\tab    8'h9e: c=8'h0b;\par
+\tab    8'h9f: c=8'hdb;\par
+\tab    8'ha0: c=8'he0;\par
+\tab    8'ha1: c=8'h32;\par
+\tab    8'ha2: c=8'h3a;\par
+\tab    8'ha3: c=8'h0a;\par
+\tab    8'ha4: c=8'h49;\par
+\tab    8'ha5: c=8'h06;\par
+\tab    8'ha6: c=8'h24;\par
+\tab    8'ha7: c=8'h5c;\par
+\tab    8'ha8: c=8'hc2;\par
+\tab    8'ha9: c=8'hd3;\par
+\tab    8'haa: c=8'hac;\par
+\tab    8'hab: c=8'h62;\par
+\tab    8'hac: c=8'h91;\par
+\tab    8'had: c=8'h95;\par
+\tab    8'hae: c=8'he4;\par
+\tab    8'haf: c=8'h79;\par
+\tab    8'hb0: c=8'he7;\par
+\tab    8'hb1: c=8'hc8;\par
+\tab    8'hb2: c=8'h37;\par
+\tab    8'hb3: c=8'h6d;\par
+\tab    8'hb4: c=8'h8d;\par
+\tab    8'hb5: c=8'hd5;\par
+\tab    8'hb6: c=8'h4e;\par
+\tab    8'hb7: c=8'ha9;\par
+\tab    8'hb8: c=8'h6c;\par
+\tab    8'hb9: c=8'h56;\par
+\tab    8'hba: c=8'hf4;\par
+\tab    8'hbb: c=8'hea;\par
+\tab    8'hbc: c=8'h65;\par
+\tab    8'hbd: c=8'h7a;\par
+\tab   \par
+\par
+                   8'hbe: c=8'hae;\par
+\tab    8'hbf: c=8'h08;\par
+\tab    8'hc0: c=8'hba;\par
+\tab    8'hc1: c=8'h78;\par
+\tab    8'hc2: c=8'h25;\par
+\tab    8'hc3: c=8'h2e;\par
+\tab    8'hc4: c=8'h1c;\par
+\tab    8'hc5: c=8'ha6;\par
+\tab    8'hc6: c=8'hb4;\par
+\tab    8'hc7: c=8'hc6;\par
+\tab    8'hc8: c=8'he8;\par
+\tab    8'hc9: c=8'hdd;\par
+\tab    8'hca: c=8'h74;\par
+\tab    8'hcb: c=8'h1f;\par
+\tab    8'hcc: c=8'h4b;\par
+\tab    8'hcd: c=8'hbd;\par
+\tab    8'hce: c=8'h8b;\par
+\tab    8'hcf: c=8'h8a;\par
+\tab    8'hd0: c=8'h70;\par
+\tab    8'hd1: c=8'h3e;\par
+\tab    8'hd2: c=8'hb5;\par
+\tab    8'hd3: c=8'h66;\par
+\tab    8'hd4: c=8'h48;\par
+\tab    8'hd5: c=8'h03;\par
+\tab    8'hd6: c=8'hf6;\par
+\tab    8'hd7: c=8'h0e;\par
+\tab    8'hd8: c=8'h61;\par
+\tab    8'hd9: c=8'h35;\par
+\tab    8'hda: c=8'h57;\par
+\tab    8'hdb: c=8'hb9;\par
+\tab    8'hdc: c=8'h86;\par
+\tab    8'hdd: c=8'hc1;\par
+\tab    8'hde: c=8'h1d;\par
+\tab    8'hdf: c=8'h9e;\par
+\tab    8'he0: c=8'he1;\par
+\tab    8'he1: c=8'hf8;\par
+\tab    8'he2: c=8'h98;\par
+\tab    8'he3: c=8'h11;\par
+\tab    8'he4: c=8'h69;\par
+\tab    8'he5: c=8'hd9;\par
+\tab    8'he6: c=8'h8e;\par
+\tab    8'he7: c=8'h94;\par
+\tab    8'he8: c=8'h9b;\par
+\tab    8'he9: c=8'h1e;\par
+\tab    8'hea: c=8'h87;\par
+\tab    8'heb: c=8'he9;\par
+\tab    8'hec: c=8'hce;\par
+\tab    8'hed: c=8'h55;\par
+\tab    8'hee: c=8'h28;\par
+\tab    8'hef: c=8'hdf;\par
+\tab    8'hf0: c=8'h8c;\par
+\tab    \par
+\par
+                   8'hf1: c=8'ha1;\par
+\tab    8'hf2: c=8'h89;\par
+\tab    8'hf3: c=8'h0d;\par
+\tab    8'hf4: c=8'hbf;\par
+\tab    8'hf5: c=8'he6;\par
+\tab    8'hf6: c=8'h42;\par
+\tab    8'hf7: c=8'h68;\par
+\tab    8'hf8: c=8'h41;\par
+\tab    8'hf9: c=8'h99;\par
+\tab    8'hfa: c=8'h2d;\par
+\tab    8'hfb: c=8'h0f;\par
+\tab    8'hfc: c=8'hb0;\par
+\tab    8'hfd: c=8'h54;\par
+\tab    8'hfe: c=8'hbb;\par
+\tab    8'hff: c=8'h16;\par
+\tab\par
+                endcase\par
+\tab end\par
+                endmodule\par
+\par
+
+\pard\sa200\sl276\slmult1\f1\lang9\par
+}
+ 
